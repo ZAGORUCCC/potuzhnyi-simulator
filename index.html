@@ -3,103 +3,409 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <title>Потужний Симулятор</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#05030d;color:#fff;font-family:Arial,sans-serif}
+html,body{
+ margin:0;
+ min-height:100%;
+ background:#05030d;
+ color:white;
+ font-family:Arial,sans-serif;
+}
 button{font-family:inherit;cursor:pointer;touch-action:manipulation}
 [hidden]{display:none!important}
 
 /* ГОЛОВНЕ МЕНЮ */
-#menu{height:100dvh;display:flex;justify-content:center;align-items:center;background:#04020a}
-.menu-image{position:relative;width:min(100vw,56.25dvh);height:min(100dvh,177.7778vw);background:url("menu.jpg") center/100% 100% no-repeat}
-.hot{position:absolute;z-index:5;border:0;background:transparent;color:transparent}
-.hot:active{background:#ffffff25}
-.clicker{left:5%;top:55.5%;width:44%;height:15.7%}
-.roll{left:51%;top:55.5%;width:44%;height:15.7%}
-.factory{left:5%;top:72%;width:44%;height:15.7%}
-.records{left:51%;top:72%;width:44%;height:15.7%}
-.profile{left:3%;top:1.8%;width:13%;height:6.5%}
-.settings{left:3%;top:90%;width:13%;height:7%}
-.menuplus{left:89%;top:2%;width:9%;height:5.5%}
-.menu-balance{position:absolute;z-index:6;left:77%;top:3.35%;width:10%;height:3.6%;display:flex;align-items:center;justify-content:center;background:#08070a;color:white;font-size:clamp(12px,3.6vw,20px);font-weight:900;pointer-events:none}
+#menu{
+ min-height:100dvh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ background:linear-gradient(180deg,#a8e5ff 0%,#e0f6ff 55%,#fff 100%);
+}
+.menu-image{
+ position:relative;
+ width:min(100vw,66.6667dvh);
+ height:min(100dvh,150vw);
+ background:url("menu.png") center/100% 100% no-repeat;
+}
+.hot{
+ position:absolute;
+ z-index:5;
+ border:0;
+ background:transparent;
+ color:transparent;
+}
+.hot:active{background:#ffffff22}
+.hot:focus-visible{outline:2px solid #fff}
+.profile{
+ left:3%;top:1.5%;width:14%;height:7.5%;
+}
+.clicker{
+ left:4%;top:10%;width:45%;height:15.5%;
+}
+.roll{
+ left:51%;top:10%;width:45%;height:15.5%;
+}
+.factory{
+ left:4%;top:26%;width:45%;height:15.5%;
+}
+.records{
+ left:51%;top:26%;width:45%;height:15.5%;
+}
+.settings{
+ left:3%;top:89%;width:14%;height:9%;
+}
+
+/* ОДНАКОВИЙ БАЛАНС У МЕНЮ ТА КЛІКЕРІ */
+.balance{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:9px;
+ min-height:46px;
+ padding:6px 13px;
+ border:2px solid #e3e1eb;
+ border-radius:17px;
+ background:#08080c;
+ color:#fff;
+ font-size:25px;
+ font-weight:900;
+ font-variant-numeric:tabular-nums;
+ white-space:nowrap;
+ box-shadow:0 3px 8px #0004;
+}
+.coin{
+ display:inline-grid;
+ place-items:center;
+ flex-shrink:0;
+ width:33px;
+ height:33px;
+ border:3px solid #ffe68a;
+ border-radius:50%;
+ background:linear-gradient(#ffdf47,#f1a000);
+ color:#8a5000;
+ font-size:20px;
+ font-weight:900;
+}
+.menu-balance-cover{
+ position:absolute;
+ z-index:8;
+ right:1%;
+ top:1%;
+ width:38%;
+ height:8.5%;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ background:linear-gradient(180deg,#afe8ff,#bcecff);
+ border-radius:13px;
+}
+.menu-balance-cover .balance{
+ max-width:100%;
+ min-width:82%;
+ font-size:clamp(19px,5vw,27px);
+}
+.balance-number{
+ overflow:hidden;
+ text-overflow:ellipsis;
+}
 
 /* КЛІКЕР */
-#game{min-height:100dvh;background:radial-gradient(ellipse at 0% 50%,#5900c7 0%,#240050 46%,#050408 100%);display:flex;justify-content:center}
-.game-inner{width:min(100%,470px);min-height:100dvh;padding:20px 15px 30px;display:flex;flex-direction:column;align-items:center}
-.top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.pill{background:#07070b;border:2px solid #dcdce4;border-radius:17px;color:#fff;padding:10px 13px;font-weight:900;font-size:17px}
-.money{display:flex;align-items:center;gap:8px}
-.coin{display:inline-grid;place-items:center;width:32px;height:32px;border:3px solid #ffe78d;border-radius:50%;background:linear-gradient(#ffd633,#ee9d00);color:#915300;font-size:21px;font-weight:900}
-.level{margin:clamp(35px,8vh,85px) 0 15px;font-size:clamp(32px,9vw,48px);font-weight:900;text-shadow:0 3px 3px #000}
-.level b{color:#9849ff}
-.barrow{width:100%;display:flex;align-items:center;gap:8px}
-.track{height:29px;flex:1;overflow:hidden;border:4px solid #080712;border-radius:12px;background:#070b17}
-.fill{height:100%;width:100%;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(5% - 2px),#0875c4 calc(5% - 2px),#0875c4 5%),linear-gradient(#33d9ff,#0088ed);transition:width .15s}
-.energy{font-size:14px;font-weight:900;white-space:nowrap}
+#game{
+ min-height:100dvh;
+ display:flex;
+ justify-content:center;
+ background:radial-gradient(
+  ellipse at 0% 50%,
+  #5900c7 0%,
+  #240050 46%,
+  #050408 100%
+ );
+}
+.game-inner{
+ width:min(100%,470px);
+ min-height:100dvh;
+ padding:20px 15px 28px;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+}
+.top{
+ width:100%;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ gap:8px;
+}
+.back{
+ min-height:46px;
+ padding:10px 14px;
+ background:#08080c;
+ color:#fff;
+ border:2px solid #e3e1eb;
+ border-radius:17px;
+ font-size:17px;
+ font-weight:900;
+}
+.level{
+ margin:clamp(30px,7vh,75px) 0 15px;
+ font-size:clamp(32px,9vw,48px);
+ font-weight:900;
+ text-shadow:0 3px 3px #000;
+}
+.level b{color:#a05aff}
+.barrow{
+ width:100%;
+ display:flex;
+ align-items:center;
+ gap:8px;
+}
+.track{
+ flex:1;
+ height:30px;
+ overflow:hidden;
+ border:4px solid #080712;
+ border-radius:12px;
+ background:#080c18;
+}
+.fill{
+ width:100%;
+ height:100%;
+ background:
+ repeating-linear-gradient(
+  90deg,
+  transparent 0,
+  transparent calc(5% - 2px),
+  #0875c4 calc(5% - 2px),
+  #0875c4 5%
+ ),
+ linear-gradient(#38ddff,#0088ef);
+ transition:width .15s;
+}
+.energy{
+ font-size:14px;
+ font-weight:900;
+ white-space:nowrap;
+}
 
-/* ВЕЛИКИЙ ПАТРОН */
-.dog{width:min(84vw,390px);height:min(84vw,390px);flex-shrink:0;border:0;border-radius:50%;overflow:hidden;background:#100719;padding:0;margin:clamp(32px,7vh,75px) 0 30px;position:relative;box-shadow:0 0 0 1px #180a32}
-.dog img{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;border-radius:50%;pointer-events:none}
+/* ВЕЛИКИЙ ПЕС ПАТРОН */
+.dog{
+ display:block;
+ position:relative;
+ width:min(90vw,400px);
+ aspect-ratio:1;
+ flex-shrink:0;
+ margin:clamp(25px,5vh,55px) 0 22px;
+ padding:0;
+ overflow:hidden;
+ border:0;
+ border-radius:50%;
+ background:#0d061c;
+}
+.dog img{
+ display:block;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center;
+ pointer-events:none;
+}
 .dog:active{transform:scale(.97)}
 
 /* ПОКРАЩЕННЯ */
-.upgrade-wrap{width:min(78%,300px);margin:0 auto 25px;display:flex;flex-direction:column;align-items:center}
-.upgrade{width:100%;min-height:145px;padding:15px 12px 27px;border:2px solid #a4a1ae;border-radius:24px;background:linear-gradient(#141018,#070609);color:white;font-size:22px;font-weight:900;line-height:1.15}
-.upgrade .arrow{display:block;font-size:52px;line-height:1}
-.price-box{position:relative;margin-top:-19px;min-width:170px;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 20px;border:2px solid #aaa7b4;border-radius:17px;background:#09090c;font-size:24px;font-weight:900;pointer-events:none}
+.upgrade-wrap{
+ width:min(80%,310px);
+ margin:0 auto 12px;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+}
+.upgrade{
+ width:100%;
+ min-height:120px;
+ padding:12px 10px 26px;
+ border:2px solid #aaa7b4;
+ border-radius:24px;
+ background:linear-gradient(#17121b,#08070b);
+ color:#fff;
+ font-size:22px;
+ font-weight:900;
+ line-height:1.15;
+}
+.upgrade-icon{
+ display:block;
+ font-size:37px;
+ line-height:1.1;
+}
+.price-box{
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:10px;
+ position:relative;
+ margin-top:-18px;
+ min-width:170px;
+ padding:7px 20px;
+ border:2px solid #aaa7b4;
+ border-radius:17px;
+ background:#09090d;
+ font-size:23px;
+ font-weight:900;
+ pointer-events:none;
+}
 .upgrade:disabled{opacity:.65}
-.message{min-height:28px;margin-top:12px;text-align:center;color:#e8dff2;font-size:14px}
+.message{
+ min-height:28px;
+ margin-top:8px;
+ text-align:center;
+ color:#e8dff2;
+ font-size:14px;
+}
 
 /* ПРОФІЛЬ */
-#profileScreen{position:fixed;inset:0;z-index:20;overflow-y:auto;background:radial-gradient(circle at 15% 15%,#522a8c,#1d1238 42%,#070610);padding:24px 18px}
-.profile-wrap{max-width:440px;margin:auto;display:flex;flex-direction:column;gap:20px}
-.profile-top{display:flex;align-items:center;gap:18px}
+#profileScreen{
+ position:fixed;
+ inset:0;
+ z-index:20;
+ overflow-y:auto;
+ background:radial-gradient(circle at 15% 15%,#522a8c,#1d1238 42%,#070610);
+ padding:24px 18px;
+}
+.profile-wrap{
+ max-width:440px;
+ margin:auto;
+ display:flex;
+ flex-direction:column;
+ gap:20px;
+}
+.profile-top{
+ display:flex;
+ align-items:center;
+ gap:18px;
+}
 .profile-top h2{margin:0;font-size:25px}
-.profile-back,.google-login,.logout{color:white;border:1px solid #a99acc;border-radius:14px;padding:12px 17px;background:#231944;font-weight:700}
-.profile-card{padding:22px 18px;border:1px solid #8c77bd;border-radius:20px;background:#170f2dcc;text-align:center}
-.profile-avatar{height:80px;width:80px;margin:0 auto 14px;border-radius:50%;background:#4e347e;display:grid;place-items:center;font-size:40px}
+.profile-back,.google-login,.logout{
+ padding:12px 17px;
+ color:#fff;
+ background:#231944;
+ border:1px solid #a99acc;
+ border-radius:14px;
+ font-weight:700;
+}
+.profile-card{
+ padding:22px 18px;
+ border:1px solid #8c77bd;
+ border-radius:20px;
+ background:#170f2dcc;
+ text-align:center;
+}
+.profile-avatar{
+ display:grid;
+ place-items:center;
+ width:80px;
+ height:80px;
+ margin:0 auto 14px;
+ border-radius:50%;
+ background:#4e347e;
+ font-size:40px;
+}
 .profile-card h3{margin:8px 0}
-.profile-card p{line-height:1.5;color:#d5cbea}
-.google-login{width:100%;background:white;color:#1f1f1f;border:0;font-size:16px;margin-top:8px}
-.logout{margin-top:12px;background:#382249}
-.profile-status{font-size:13px;color:#d5cbea;min-height:22px}
-.profile-stats{display:flex;gap:12px}
-.profile-stat{flex:1;background:#21163d;border-radius:15px;padding:16px 8px;text-align:center}
-.profile-stat strong{display:block;font-size:24px}
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;background:#171222;border:1px solid #c2b5d7;border-radius:14px;padding:12px 16px;text-align:center;min-width:180px}
+.profile-card p{
+ line-height:1.5;
+ color:#d5cbea;
+}
+.google-login{
+ width:100%;
+ margin-top:8px;
+ background:#fff;
+ color:#1f1f1f;
+ border:0;
+ font-size:16px;
+}
+.logout{
+ margin-top:12px;
+ background:#382249;
+}
+.profile-status{
+ min-height:22px;
+ font-size:13px;
+ color:#d5cbea;
+}
+.profile-stats{
+ display:flex;
+ gap:12px;
+}
+.profile-stat{
+ flex:1;
+ padding:16px 8px;
+ border-radius:15px;
+ background:#21163d;
+ text-align:center;
+}
+.profile-stat strong{
+ display:block;
+ font-size:24px;
+}
+.toast{
+ position:fixed;
+ z-index:50;
+ bottom:24px;
+ left:50%;
+ transform:translateX(-50%);
+ min-width:180px;
+ padding:12px 16px;
+ border:1px solid #c2b5d7;
+ border-radius:14px;
+ background:#171222;
+ text-align:center;
+}
 </style>
 </head>
 <body>
 
+<!-- ГОЛОВНЕ МЕНЮ -->
 <section id="menu">
 <div class="menu-image">
-<div class="menu-balance" id="menuCoins">0</div>
+
+<button class="hot profile" id="profileButton" aria-label="Акаунт"></button>
+
+<div class="menu-balance-cover">
+<div class="balance">
+<span class="coin">♛</span>
+<span class="balance-number" id="menuCoins">0</span>
+</div>
+</div>
+
 <button class="hot clicker" id="openClicker" aria-label="Клікер"></button>
 <button class="hot roll" data-soon="Ролл" aria-label="Ролл"></button>
 <button class="hot factory" data-soon="Фабрика" aria-label="Фабрика"></button>
 <button class="hot records" data-soon="Рекорди" aria-label="Рекорди"></button>
-<button class="hot profile" id="profileButton" aria-label="Акаунт"></button>
 <button class="hot settings" data-soon="Налаштування" aria-label="Налаштування"></button>
-<button class="hot menuplus" data-soon="Магазин" aria-label="Магазин"></button>
+
 </div>
 </section>
 
+<!-- КЛІКЕР -->
 <section id="game" hidden>
 <div class="game-inner">
+
 <div class="top">
-<button class="pill" id="back">❮ Назад</button>
-<div class="money">
+<button class="back" id="back">❮ Назад</button>
+<div class="balance">
 <span class="coin">♛</span>
-<strong id="coins">0</strong>
-<button class="pill" id="plus">＋</button>
+<span class="balance-number" id="coins">0</span>
 </div>
 </div>
 
 <h1 class="level">РІВЕНЬ <b id="level">1</b></h1>
+
 <div class="barrow">
-<div class="track"><div class="fill" id="fill"></div></div>
+<div class="track">
+<div class="fill" id="fill"></div>
+</div>
 <span class="energy" id="energy">100/100</span>
 </div>
 
@@ -109,7 +415,7 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation}
 
 <div class="upgrade-wrap">
 <button class="upgrade" id="upgrade">
-<span class="arrow">⬆</span>
+<span class="upgrade-icon">⬆</span>
 ПОКРАЩИТИ<br>РІВЕНЬ
 </button>
 <div class="price-box">
@@ -118,45 +424,83 @@ button{font-family:inherit;cursor:pointer;touch-action:manipulation}
 </div>
 </div>
 
-<div class="message" id="msg">Натискай на Патрона, щоб збирати монети!</div>
+<div class="message" id="msg">
+Натискай на Патрона, щоб збирати монети!
+</div>
+
 </div>
 </section>
 
+<!-- ПРОФІЛЬ -->
 <section id="profileScreen" hidden>
 <div class="profile-wrap">
+
 <div class="profile-top">
 <button class="profile-back" id="profileBack">❮ Назад</button>
 <h2>ПРОФІЛЬ</h2>
 </div>
+
 <div class="profile-card">
 <div class="profile-avatar">👤</div>
 <h3 id="profileName">Гість</h3>
-<p id="profileDescription">Увійди через Google, щоб зберігати прогрес у хмарі.</p>
-<button class="google-login" id="googleLogin">🌐 Вибрати Google-акаунт</button>
-<button class="logout" id="googleLogout" hidden>Вийти з акаунта</button>
-<p class="profile-status" id="profileStatus">Підключення до Firebase…</p>
+<p id="profileDescription">
+Увійди через Google, щоб зберігати прогрес у хмарі.
+</p>
+<button class="google-login" id="googleLogin">
+🌐 Вибрати Google-акаунт
+</button>
+<button class="logout" id="googleLogout" hidden>
+Вийти з акаунта
+</button>
+<p class="profile-status" id="profileStatus">
+Підключення до Firebase…
+</p>
 </div>
+
 <div class="profile-stats">
-<div class="profile-stat">🪙 Монети<strong id="profileCoins">0</strong></div>
-<div class="profile-stat">⭐ Рівень<strong id="profileLevel">1</strong></div>
+<div class="profile-stat">
+🪙 Монети
+<strong id="profileCoins">0</strong>
 </div>
+<div class="profile-stat">
+⭐ Рівень
+<strong id="profileLevel">1</strong>
+</div>
+</div>
+
 </div>
 </section>
 
 <div class="toast" id="toast" hidden></div>
 
+<!-- ЛОГІКА ГРИ -->
 <script>
 (()=>{
 "use strict";
+
 const el=id=>document.getElementById(id);
-const menu=el("menu"),game=el("game"),profile=el("profileScreen");
+const menu=el("menu");
+const game=el("game");
+const profile=el("profileScreen");
 const key="potuzhnyi_clicker_v4";
-let state={coins:0,energy:100,level:1,last:Date.now()};
-let carry=0,toastTimer;
+
+let state={
+ coins:0,
+ energy:100,
+ level:1,
+ last:Date.now()
+};
+
+let carry=0;
+let toastTimer;
+let cloudLoading=false;
 
 try{
  const old=JSON.parse(localStorage.getItem(key));
- if(old&&Number.isFinite(old.coins)&&Number.isFinite(old.level)&&Number.isFinite(old.energy)){
+ if(old&&
+ Number.isFinite(old.coins)&&
+ Number.isFinite(old.level)&&
+ Number.isFinite(old.energy)){
   state={...state,...old};
  }
 }catch(e){}
@@ -170,14 +514,25 @@ function toast(message){
  box.textContent=message;
  box.hidden=false;
  clearTimeout(toastTimer);
- toastTimer=setTimeout(()=>box.hidden=true,2200);
+ toastTimer=setTimeout(()=>{
+  box.hidden=true;
+ },2200);
 }
 
-function price(){return state.level*200;}
+function price(){
+ return state.level*200;
+}
 
 function save(){
- try{localStorage.setItem(key,JSON.stringify(state))}catch(e){}
- window.dispatchEvent(new CustomEvent("game-save",{detail:{...state}}));
+ try{
+  localStorage.setItem(key,JSON.stringify(state));
+ }catch(e){}
+
+ if(!cloudLoading){
+  window.dispatchEvent(new CustomEvent("game-save",{
+   detail:{...state}
+  }));
+ }
 }
 
 function draw(){
@@ -194,7 +549,11 @@ function draw(){
 
 function tick(){
  const now=Date.now();
- const seconds=Math.min(86400,Math.max(0,(now-state.last)/1000));
+ const seconds=Math.min(
+  86400,
+  Math.max(0,(now-state.last)/1000)
+ );
+
  state.last=now;
  carry+=seconds;
  let changed=false;
@@ -206,8 +565,12 @@ function tick(){
   state.energy=Math.min(100,state.energy+2);
   changed=true;
  }
+
  if(state.energy===100)carry=0;
- if(changed){save();draw();}
+ if(changed){
+  save();
+  draw();
+ }
 }
 
 el("openClicker").onclick=()=>{
@@ -237,60 +600,96 @@ el("profileBack").onclick=()=>{
 };
 
 document.querySelectorAll("[data-soon]").forEach(button=>{
- button.onclick=()=>toast(button.dataset.soon+" — скоро буде!");
+ button.onclick=()=>{
+  toast(button.dataset.soon+" — скоро буде!");
+ };
 });
-
-el("plus").onclick=()=>toast("Магазин ще в розробці");
 
 el("dog").onclick=()=>{
  tick();
+
  if(state.energy<2){
   toast("Енергія закінчилась!");
   return;
  }
+
  state.energy-=2;
  state.coins+=state.level;
  state.last=Date.now();
+
  save();
  draw();
+
  el("msg").textContent="+"+state.level+" монет 🪙";
 };
 
 el("upgrade").onclick=()=>{
  const cost=price();
+
  if(state.coins<cost)return;
+
  state.coins-=cost;
  state.level++;
+
  save();
  draw();
- el("msg").textContent="Новий рівень! +"+state.level+" монети за клік";
+
+ el("msg").textContent=
+  "Новий рівень! +"+state.level+" монети за клік";
 };
 
 window.addEventListener("cloud-load",event=>{
  const d=event.detail;
  if(!d)return;
+
+ cloudLoading=true;
+
  state.coins=Math.max(0,Math.floor(Number(d.coins)||0));
  state.level=Math.max(1,Math.floor(Number(d.level)||1));
- state.energy=Math.max(0,Math.min(100,Number.isFinite(Number(d.energy))?Math.floor(Number(d.energy)):100));
+ state.energy=Math.max(
+  0,
+  Math.min(100,Number.isFinite(Number(d.energy))
+   ?Math.floor(Number(d.energy)):100)
+ );
  state.last=Number(d.last)||Date.now();
+
  carry=0;
  save();
  tick();
  draw();
+
+ cloudLoading=false;
 });
 
 window.addEventListener("pagehide",save);
+
 tick();
 draw();
 setInterval(tick,250);
+
 })();
 </script>
 
+<!-- FIREBASE І GOOGLE -->
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+
+import {
+ getAuth,
+ GoogleAuthProvider,
+ signInWithPopup,
+ signOut,
+ onAuthStateChanged
+}
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import {getFirestore,doc,getDoc,setDoc}
+
+import {
+ getFirestore,
+ doc,
+ getDoc,
+ setDoc
+}
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig={
@@ -303,37 +702,64 @@ const firebaseConfig={
 };
 
 const $=id=>document.getElementById(id);
-const status=message=>$("profileStatus").textContent=message;
+const status=message=>{
+ $("profileStatus").textContent=message;
+};
+
 const saveKey="potuzhnyi_clicker_v4";
-let auth,db,user=null,ready=false,pending=null,timer=null;
+
+let auth;
+let db;
+let user=null;
+let ready=false;
+let pending=null;
+let timer=null;
 let session=0;
+let loginBusy=false;
 
 function snapshot(){
- try{return JSON.parse(localStorage.getItem(saveKey)||"{}")}
- catch(e){return {}}
+ try{
+  return JSON.parse(localStorage.getItem(saveKey)||"{}");
+ }catch(e){
+  return {};
+ }
 }
 
 function valid(d){
- return d&&Number.isFinite(d.coins)&&Number.isFinite(d.level)&&Number.isFinite(d.energy);
+ return d&&
+ Number.isFinite(d.coins)&&
+ Number.isFinite(d.level)&&
+ Number.isFinite(d.energy);
 }
 
 async function flush(){
  if(!user||!ready||!pending)return;
+
  const uid=user.uid;
  const data=pending;
  pending=null;
+
  try{
   await setDoc(doc(db,"players",uid),data,{merge:true});
-  if(user?.uid===uid)status("☁️ Прогрес збережено");
+  if(user?.uid===uid){
+   status("☁️ Прогрес збережено");
+  }
  }catch(err){
-  if(user?.uid===uid)pending=data;
-  status("Помилка збереження: "+(err.code||err.message));
+  if(user?.uid===uid){
+   pending=data;
+   status("Помилка збереження: "+(err.code||err.message));
+  }
  }
 }
 
 window.addEventListener("game-save",event=>{
  if(!user||!ready)return;
- pending={...event.detail,updatedAt:Date.now()};
+
+ pending={
+  ...event.detail,
+  updatedAt:Date.now()
+ };
+
  clearTimeout(timer);
  timer=setTimeout(flush,900);
 });
@@ -351,15 +777,22 @@ try{
  db=getFirestore(app);
 
  async function googleLogin(){
+  if(loginBusy)return;
+  loginBusy=true;
   $("googleLogin").disabled=true;
-  status("Відкриваємо список Google-акаунтів…");
+  status("Відкриваємо Google…");
+
   try{
    const provider=new GoogleAuthProvider();
-   provider.setCustomParameters({prompt:"select_account"});
+   provider.setCustomParameters({
+    prompt:"select_account"
+   });
+
    await signInWithPopup(auth,provider);
   }catch(err){
    status("Помилка входу: "+(err.code||err.message));
   }finally{
+   loginBusy=false;
    $("googleLogin").disabled=false;
   }
  }
@@ -367,7 +800,9 @@ try{
  $("googleLogin").onclick=googleLogin;
 
  window.addEventListener("request-google-login",()=>{
-  if(!auth.currentUser)googleLogin();
+  if(!auth.currentUser){
+   googleLogin();
+  }
  });
 
  $("googleLogout").onclick=async()=>{
@@ -377,6 +812,7 @@ try{
 
  onAuthStateChanged(auth,async current=>{
   const mySession=++session;
+
   user=current;
   ready=false;
   pending=null;
@@ -384,7 +820,11 @@ try{
 
   $("googleLogin").hidden=!!current;
   $("googleLogout").hidden=!current;
-  $("profileName").textContent=current?(current.displayName||"Гравець"):"Гість";
+
+  $("profileName").textContent=current
+   ?(current.displayName||"Гравець")
+   :"Гість";
+
   $("profileDescription").textContent=current
    ?"Твій прогрес прив’язаний до Google-акаунта."
    :"Увійди через Google, щоб зберігати прогрес у хмарі.";
@@ -399,6 +839,7 @@ try{
   try{
    const ref=doc(db,"players",current.uid);
    const result=await getDoc(ref);
+
    if(mySession!==session)return;
 
    if(result.exists()&&valid(result.data())){
@@ -408,9 +849,15 @@ try{
    }else{
     const local=snapshot();
     const previous=localStorage.getItem("potuzhnyi_last_account");
+
     const data=(!previous&&valid(local))
      ?local
-     :{coins:0,level:1,energy:100,last:Date.now()};
+     :{
+       coins:0,
+       level:1,
+       energy:100,
+       last:Date.now()
+      };
 
     window.dispatchEvent(new CustomEvent("cloud-load",{
      detail:data
@@ -430,15 +877,18 @@ try{
    localStorage.setItem("potuzhnyi_last_account",current.uid);
    ready=true;
    status("☁️ Прогрес синхронізовано");
+
   }catch(err){
    if(mySession===session){
     status("Помилка завантаження: "+(err.code||err.message));
    }
   }
  });
+
 }catch(err){
  status("Firebase не запустився: "+(err.message||err));
 }
 </script>
+
 </body>
 </html>
