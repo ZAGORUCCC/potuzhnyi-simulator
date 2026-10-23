@@ -3,18 +3,19 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <title>Потужний Симулятор</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;min-height:100%;background:#05030d;color:white;font-family:Arial,sans-serif}
-button{cursor:pointer;touch-action:manipulation;font-family:inherit}
+html,body{margin:0;min-height:100%;background:#05030d;color:#fff;font-family:Arial,sans-serif}
+button{font-family:inherit;cursor:pointer;touch-action:manipulation}
 [hidden]{display:none!important}
+
+/* ГОЛОВНЕ МЕНЮ */
 #menu{height:100dvh;display:flex;justify-content:center;align-items:center;background:#04020a}
 .menu-image{position:relative;width:min(100vw,56.25dvh);height:min(100dvh,177.7778vw);background:url("menu.jpg") center/100% 100% no-repeat}
-.hot{position:absolute;z-index:2;background:transparent;border:0;border-radius:8%}
-.hot:active{background:#ffffff30}
-.hot:focus-visible{outline:2px solid white}
+.hot{position:absolute;z-index:5;border:0;background:transparent;color:transparent}
+.hot:active{background:#ffffff25}
 .clicker{left:5%;top:55.5%;width:44%;height:15.7%}
 .roll{left:51%;top:55.5%;width:44%;height:15.7%}
 .factory{left:5%;top:72%;width:44%;height:15.7%}
@@ -22,31 +23,40 @@ button{cursor:pointer;touch-action:manipulation;font-family:inherit}
 .profile{left:3%;top:1.8%;width:13%;height:6.5%}
 .settings{left:3%;top:90%;width:13%;height:7%}
 .menuplus{left:89%;top:2%;width:9%;height:5.5%}
-#game{min-height:100dvh;background:radial-gradient(ellipse at 0% 48%,#5900c7,#23004f 46%,#050408);display:flex;justify-content:center}
-.game-inner{width:min(100%,470px);min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:24px 17px 34px}
-.top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:10px}
-.pill{color:white;background:#050509;border:2px solid #eee;border-radius:17px;padding:10px 13px;font-weight:800;font-size:17px}
+.menu-balance{position:absolute;z-index:6;left:77%;top:3.35%;width:10%;height:3.6%;display:flex;align-items:center;justify-content:center;background:#08070a;color:white;font-size:clamp(12px,3.6vw,20px);font-weight:900;pointer-events:none}
+
+/* КЛІКЕР */
+#game{min-height:100dvh;background:radial-gradient(ellipse at 0% 50%,#5900c7 0%,#240050 46%,#050408 100%);display:flex;justify-content:center}
+.game-inner{width:min(100%,470px);min-height:100dvh;padding:20px 15px 30px;display:flex;flex-direction:column;align-items:center}
+.top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pill{background:#07070b;border:2px solid #dcdce4;border-radius:17px;color:#fff;padding:10px 13px;font-weight:900;font-size:17px}
 .money{display:flex;align-items:center;gap:8px}
-.coin{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;border:3px solid #ffde70;background:#f8ad00;color:#8d5100}
-.level{font-size:clamp(30px,8vw,45px);font-weight:900;margin:56px 0 14px}
-.level b{color:#a55bff}
+.coin{display:inline-grid;place-items:center;width:32px;height:32px;border:3px solid #ffe78d;border-radius:50%;background:linear-gradient(#ffd633,#ee9d00);color:#915300;font-size:21px;font-weight:900}
+.level{margin:clamp(35px,8vh,85px) 0 15px;font-size:clamp(32px,9vw,48px);font-weight:900;text-shadow:0 3px 3px #000}
+.level b{color:#9849ff}
 .barrow{width:100%;display:flex;align-items:center;gap:8px}
-.track{flex:1;height:31px;border:4px solid #0d0916;border-radius:12px;background:#0a0c18;overflow:hidden}
-.fill{height:100%;width:100%;background:linear-gradient(#36d7ff,#0089ef);transition:width .15s}
+.track{height:29px;flex:1;overflow:hidden;border:4px solid #080712;border-radius:12px;background:#070b17}
+.fill{height:100%;width:100%;background:repeating-linear-gradient(90deg,transparent 0,transparent calc(5% - 2px),#0875c4 calc(5% - 2px),#0875c4 5%),linear-gradient(#33d9ff,#0088ed);transition:width .15s}
 .energy{font-size:14px;font-weight:900;white-space:nowrap}
-.dog{width:min(75vw,310px);aspect-ratio:1;border:0;border-radius:50%;overflow:hidden;background:#100a1c;padding:0;margin:auto 0;transition:transform .08s}
-.dog:active{transform:scale(.95)}
-.dog img{width:100%;height:100%;object-fit:cover}
-.upgrade{margin-top:25px;border:2px solid #eee;border-radius:22px;background:#08080c;color:white;font-size:20px;font-weight:900;min-width:245px;padding:17px 22px}
-.upgrade small{display:block;margin-top:8px;font-size:17px}
+
+/* ВЕЛИКИЙ ПАТРОН */
+.dog{width:min(84vw,390px);height:min(84vw,390px);flex-shrink:0;border:0;border-radius:50%;overflow:hidden;background:#100719;padding:0;margin:clamp(32px,7vh,75px) 0 30px;position:relative;box-shadow:0 0 0 1px #180a32}
+.dog img{display:block;width:100%;height:100%;object-fit:cover;object-position:center center;border-radius:50%;pointer-events:none}
+.dog:active{transform:scale(.97)}
+
+/* ПОКРАЩЕННЯ */
+.upgrade-wrap{width:min(78%,300px);margin:0 auto 25px;display:flex;flex-direction:column;align-items:center}
+.upgrade{width:100%;min-height:145px;padding:15px 12px 27px;border:2px solid #a4a1ae;border-radius:24px;background:linear-gradient(#141018,#070609);color:white;font-size:22px;font-weight:900;line-height:1.15}
+.upgrade .arrow{display:block;font-size:52px;line-height:1}
+.price-box{position:relative;margin-top:-19px;min-width:170px;display:flex;align-items:center;justify-content:center;gap:10px;padding:8px 20px;border:2px solid #aaa7b4;border-radius:17px;background:#09090c;font-size:24px;font-weight:900;pointer-events:none}
 .upgrade:disabled{opacity:.65}
-.message{min-height:36px;text-align:center;margin-top:14px;color:#e5d6ff;font-size:14px}
-.footer{opacity:.55;font-size:12px;text-align:center}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#171222;border:1px solid #c2b5d7;padding:12px 16px;border-radius:14px;z-index:50;text-align:center}
-#profileScreen{position:fixed;inset:0;z-index:30;overflow-y:auto;background:radial-gradient(circle at 15% 15%,#522a8c,#1d1238 42%,#070610);padding:24px 18px}
+.message{min-height:28px;margin-top:12px;text-align:center;color:#e8dff2;font-size:14px}
+
+/* ПРОФІЛЬ */
+#profileScreen{position:fixed;inset:0;z-index:20;overflow-y:auto;background:radial-gradient(circle at 15% 15%,#522a8c,#1d1238 42%,#070610);padding:24px 18px}
 .profile-wrap{max-width:440px;margin:auto;display:flex;flex-direction:column;gap:20px}
 .profile-top{display:flex;align-items:center;gap:18px}
-.profile-top h2{font-size:25px;margin:0}
+.profile-top h2{margin:0;font-size:25px}
 .profile-back,.google-login,.logout{color:white;border:1px solid #a99acc;border-radius:14px;padding:12px 17px;background:#231944;font-weight:700}
 .profile-card{padding:22px 18px;border:1px solid #8c77bd;border-radius:20px;background:#170f2dcc;text-align:center}
 .profile-avatar{height:80px;width:80px;margin:0 auto 14px;border-radius:50%;background:#4e347e;display:grid;place-items:center;font-size:40px}
@@ -58,17 +68,19 @@ button{cursor:pointer;touch-action:manipulation;font-family:inherit}
 .profile-stats{display:flex;gap:12px}
 .profile-stat{flex:1;background:#21163d;border-radius:15px;padding:16px 8px;text-align:center}
 .profile-stat strong{display:block;font-size:24px}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:50;background:#171222;border:1px solid #c2b5d7;border-radius:14px;padding:12px 16px;text-align:center;min-width:180px}
 </style>
 </head>
 <body>
 
 <section id="menu">
 <div class="menu-image">
+<div class="menu-balance" id="menuCoins">0</div>
 <button class="hot clicker" id="openClicker" aria-label="Клікер"></button>
 <button class="hot roll" data-soon="Ролл" aria-label="Ролл"></button>
 <button class="hot factory" data-soon="Фабрика" aria-label="Фабрика"></button>
 <button class="hot records" data-soon="Рекорди" aria-label="Рекорди"></button>
-<button class="hot profile" id="profileButton" aria-label="Профіль"></button>
+<button class="hot profile" id="profileButton" aria-label="Акаунт"></button>
 <button class="hot settings" data-soon="Налаштування" aria-label="Налаштування"></button>
 <button class="hot menuplus" data-soon="Магазин" aria-label="Магазин"></button>
 </div>
@@ -84,20 +96,29 @@ button{cursor:pointer;touch-action:manipulation;font-family:inherit}
 <button class="pill" id="plus">＋</button>
 </div>
 </div>
+
 <h1 class="level">РІВЕНЬ <b id="level">1</b></h1>
 <div class="barrow">
 <div class="track"><div class="fill" id="fill"></div></div>
 <span class="energy" id="energy">100/100</span>
 </div>
+
 <button class="dog" id="dog" aria-label="Натиснути на Пса Патрона">
 <img src="patron.png" alt="Пес Патрон">
 </button>
+
+<div class="upgrade-wrap">
 <button class="upgrade" id="upgrade">
-⬆<br>ПОКРАЩИТИ РІВЕНЬ
-<small><span class="coin">♛</span> <span id="price">200</span></small>
+<span class="arrow">⬆</span>
+ПОКРАЩИТИ<br>РІВЕНЬ
 </button>
+<div class="price-box">
+<span class="coin">♛</span>
+<span id="price">200</span>
+</div>
+</div>
+
 <div class="message" id="msg">Натискай на Патрона, щоб збирати монети!</div>
-<div class="footer">Прогрес зберігається у браузері або через Google</div>
 </div>
 </section>
 
@@ -111,7 +132,7 @@ button{cursor:pointer;touch-action:manipulation;font-family:inherit}
 <div class="profile-avatar">👤</div>
 <h3 id="profileName">Гість</h3>
 <p id="profileDescription">Увійди через Google, щоб зберігати прогрес у хмарі.</p>
-<button class="google-login" id="googleLogin">🌐 Увійти через Google</button>
+<button class="google-login" id="googleLogin">🌐 Вибрати Google-акаунт</button>
 <button class="logout" id="googleLogout" hidden>Вийти з акаунта</button>
 <p class="profile-status" id="profileStatus">Підключення до Firebase…</p>
 </div>
@@ -128,14 +149,10 @@ button{cursor:pointer;touch-action:manipulation;font-family:inherit}
 (()=>{
 "use strict";
 const el=id=>document.getElementById(id);
-const menu=el("menu");
-const game=el("game");
-const profile=el("profileScreen");
+const menu=el("menu"),game=el("game"),profile=el("profileScreen");
 const key="potuzhnyi_clicker_v4";
-
 let state={coins:0,energy:100,level:1,last:Date.now()};
-let carry=0;
-let toastTimer;
+let carry=0,toastTimer;
 
 try{
  const old=JSON.parse(localStorage.getItem(key));
@@ -156,19 +173,16 @@ function toast(message){
  toastTimer=setTimeout(()=>box.hidden=true,2200);
 }
 
-function price(){
- return state.level*200;
-}
+function price(){return state.level*200;}
 
 function save(){
  try{localStorage.setItem(key,JSON.stringify(state))}catch(e){}
- window.dispatchEvent(new CustomEvent("game-save",{
-  detail:{...state}
- }));
+ window.dispatchEvent(new CustomEvent("game-save",{detail:{...state}}));
 }
 
 function draw(){
  el("coins").textContent=state.coins;
+ el("menuCoins").textContent=state.coins;
  el("level").textContent=state.level;
  el("energy").textContent=state.energy+"/100";
  el("fill").style.width=state.energy+"%";
@@ -192,7 +206,6 @@ function tick(){
   state.energy=Math.min(100,state.energy+2);
   changed=true;
  }
-
  if(state.energy===100)carry=0;
  if(changed){save();draw();}
 }
@@ -215,6 +228,7 @@ el("profileButton").onclick=()=>{
  game.hidden=true;
  profile.hidden=false;
  draw();
+ window.dispatchEvent(new Event("request-google-login"));
 };
 
 el("profileBack").onclick=()=>{
@@ -291,7 +305,6 @@ const firebaseConfig={
 const $=id=>document.getElementById(id);
 const status=message=>$("profileStatus").textContent=message;
 const saveKey="potuzhnyi_clicker_v4";
-
 let auth,db,user=null,ready=false,pending=null,timer=null;
 let session=0;
 
@@ -337,17 +350,25 @@ try{
  auth=getAuth(app);
  db=getFirestore(app);
 
- $("googleLogin").onclick=async()=>{
+ async function googleLogin(){
   $("googleLogin").disabled=true;
-  status("Відкриваємо Google…");
+  status("Відкриваємо список Google-акаунтів…");
   try{
-   await signInWithPopup(auth,new GoogleAuthProvider());
+   const provider=new GoogleAuthProvider();
+   provider.setCustomParameters({prompt:"select_account"});
+   await signInWithPopup(auth,provider);
   }catch(err){
    status("Помилка входу: "+(err.code||err.message));
   }finally{
    $("googleLogin").disabled=false;
   }
- };
+ }
+
+ $("googleLogin").onclick=googleLogin;
+
+ window.addEventListener("request-google-login",()=>{
+  if(!auth.currentUser)googleLogin();
+ });
 
  $("googleLogout").onclick=async()=>{
   await flush();
@@ -378,7 +399,6 @@ try{
   try{
    const ref=doc(db,"players",current.uid);
    const result=await getDoc(ref);
-
    if(mySession!==session)return;
 
    if(result.exists()&&valid(result.data())){
