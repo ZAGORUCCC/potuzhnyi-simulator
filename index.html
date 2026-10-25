@@ -147,21 +147,45 @@ button {
  right: 3%;
 }
 
-/* КЛІКЕР */
+/* КЛІКЕР — БЛАКИТНЕ НЕБО */
 
 #game {
+ position: relative;
  min-height: 100dvh;
  display: flex;
  justify-content: center;
- background: radial-gradient(
-  ellipse at 0% 55%,
-  #6000d4 0%,
-  #2c0064 43%,
-  #06040b 100%
- );
+ overflow: hidden;
+ isolation: isolate;
+ background:
+  radial-gradient(
+   ellipse 65% 14% at 12% 76%,
+   #ffffff 0%,
+   #ffffffdd 50%,
+   transparent 100%
+  ),
+  radial-gradient(
+   ellipse 75% 16% at 92% 86%,
+   #ffffff 0%,
+   #ffffffdd 55%,
+   transparent 100%
+  ),
+  radial-gradient(
+   ellipse 60% 10% at 40% 94%,
+   #ffffff 0%,
+   transparent 100%
+  ),
+  linear-gradient(
+   180deg,
+   #1dbbff 0%,
+   #6dd8ff 43%,
+   #b9edff 68%,
+   #ffffff 100%
+  );
 }
 
 .game-inner {
+ position: relative;
+ z-index: 1;
  width: min(100%, 480px);
  min-height: 100dvh;
  padding: 20px 15px 24px;
@@ -232,12 +256,30 @@ button {
 }
 
 .energy-text {
+ color: #101827;
  font-size: 14px;
  font-weight: 900;
  white-space: nowrap;
 }
 
-/* ПЕС ПАТРОН */
+/* НАЗВА ПЕРСОНАЖА */
+
+.character-name {
+ width: 100%;
+ margin: 19px 0 0;
+ color: #ffffff;
+ font-size: clamp(23px, 6vw, 32px);
+ font-weight: 900;
+ text-align: center;
+ text-transform: uppercase;
+ letter-spacing: 0.5px;
+ -webkit-text-stroke: 1px #18203c;
+ text-shadow:
+  0 3px 0 #18203c,
+  0 4px 7px #0007;
+}
+
+/* ПЕРСОНАЖ */
 
 .patron-button {
  position: relative;
@@ -245,13 +287,13 @@ button {
  flex-shrink: 0;
  width: min(84vw, 43dvh, 390px);
  height: min(84vw, 43dvh, 390px);
- margin: clamp(22px, 5vh, 55px) 0 24px;
+ margin: clamp(12px, 3vh, 32px) 0 24px;
  padding: 0;
  overflow: hidden;
  border: none;
  border-radius: 50%;
  background: #1d0642;
- box-shadow: 0 0 0 2px #180a2b;
+ box-shadow: 0 0 0 3px #180a2b;
  -webkit-tap-highlight-color: transparent;
 }
 
@@ -328,11 +370,12 @@ button {
  min-height: 26px;
  margin: 20px 0 0;
  text-align: center;
- color: #e6dcf5;
+ color: #18203c;
  font-size: 14px;
+ font-weight: 900;
 }
 
-/* ПРОФІЛЬ — ТІЛЬКИ ГОТОВА КАРТИНКА */
+/* ПРОФІЛЬ */
 
 #profileScreen {
  position: fixed;
@@ -358,10 +401,9 @@ button {
  pointer-events: none;
 }
 
-/* Прозорі натискальні області */
-
 .profile-back {
  position: absolute;
+ z-index: 2;
  left: 4%;
  top: 2.5%;
  width: 25%;
@@ -393,6 +435,7 @@ button {
 
 .edit-name {
  position: absolute;
+ z-index: 3;
  left: 65.5%;
  top: 28.8%;
  width: 7%;
@@ -423,26 +466,42 @@ button {
  display: none;
 }
 
+/* КНОПКИ GOOGLE */
+
 .google-login,
 .logout {
  position: absolute;
+ z-index: 4;
  left: 8.5%;
  width: 83%;
- height: 5.7%;
+ height: 6.3%;
  padding: 0;
  margin: 0;
  border: none;
  background: transparent;
  color: transparent;
  font-size: 0;
+ cursor: pointer;
+ touch-action: manipulation;
+ -webkit-tap-highlight-color: #ffffff35;
 }
 
 .google-login {
- top: 43.8%;
+ top: 43.2%;
 }
 
 .logout {
- top: 50.8%;
+ top: 50.4%;
+}
+
+.google-login:active,
+.logout:active {
+ background: #ffffff25;
+ border-radius: 12px;
+}
+
+.google-login:disabled {
+ cursor: wait;
 }
 
 .profile-status {
@@ -488,7 +547,7 @@ button {
 
 .name-editor {
  position: absolute;
- z-index: 5;
+ z-index: 6;
  left: 8%;
  top: 34%;
  width: 84%;
@@ -536,11 +595,13 @@ button {
  left: 50%;
  transform: translateX(-50%);
  min-width: 180px;
+ max-width: 92vw;
  padding: 12px 16px;
  border: 1px solid #c2b5d7;
  border-radius: 14px;
  background: #171222;
  text-align: center;
+ overflow-wrap: anywhere;
 }
 
 @media(max-height:700px) {
@@ -548,10 +609,15 @@ button {
   margin-top: 22px;
  }
 
+ .character-name {
+  margin-top: 12px;
+  font-size: 23px;
+ }
+
  .patron-button {
   width: min(76vw, 37dvh);
   height: min(76vw, 37dvh);
-  margin: 20px 0;
+  margin: 14px 0 20px;
  }
 
  .upgrade-button {
@@ -611,11 +677,18 @@ button {
    <span class="energy-text" id="energyText">100/100</span>
   </div>
 
+  <h2 class="character-name" id="characterName">
+   ПЕС ПАТРОН
+  </h2>
+
   <button
    class="patron-button"
    id="patron"
-   aria-label="Натиснути на Пса Патрона">
-   <img src="patron.png?v=3" alt="Пес Патрон">
+   aria-label="Натиснути на персонажа">
+   <img
+    id="characterImage"
+    src="patron.png?v=3"
+    alt="Пес Патрон">
   </button>
 
   <div class="upgrade-wrap">
@@ -631,7 +704,7 @@ button {
   </div>
 
   <div class="game-message" id="gameMessage">
-   Натискай на Патрона, щоб збирати монети!
+   Натискай на персонажа, щоб збирати монети!
   </div>
 
  </div>
@@ -739,6 +812,38 @@ function upgradeCost(){
  return state.level*200;
 }
 
+/* КОЖЕН РІВЕНЬ ПОДВОЮЄ МОНЕТИ */
+
+function coinsPerClick(){
+ return Math.pow(2,state.level-1);
+}
+
+/* ПЕРСОНАЖ ЗАЛЕЖИТЬ ВІД РІВНЯ */
+
+function updateCharacter(){
+ const isBoss=state.level>=2;
+
+ const name=isBoss?"БОС СНУ":"ПЕС ПАТРОН";
+ const image=isBoss
+  ?"boss_snu.png?v=1"
+  :"patron.png?v=3";
+
+ $("characterName").textContent=name;
+
+ const img=$("characterImage");
+
+ if(img.dataset.character!==image){
+  img.dataset.character=image;
+  img.src=image;
+ }
+
+ img.alt=name;
+ $("patron").setAttribute(
+  "aria-label",
+  "Натиснути на "+name
+ );
+}
+
 function draw(){
  $("coins").textContent=state.coins;
  $("menuCoins").textContent=state.coins;
@@ -749,6 +854,8 @@ function draw(){
  $("energyFill").style.width=state.energy+"%";
  $("upgradePrice").textContent=upgradeCost();
  $("upgrade").disabled=state.coins<upgradeCost();
+
+ updateCharacter();
 }
 
 function save(){
@@ -777,7 +884,10 @@ function toast(message){
 
 function regenerate(){
  const now=Date.now();
- const elapsed=Math.max(0,Math.min(86400,(now-state.last)/1000));
+ const elapsed=Math.max(
+  0,
+  Math.min(86400,(now-state.last)/1000)
+ );
 
  state.last=now;
  energyCarry+=elapsed;
@@ -838,6 +948,8 @@ document.querySelectorAll("[data-soon]").forEach(button=>{
  };
 });
 
+/* КЛІК ПО ПЕРСОНАЖУ */
+
 $("patron").onclick=()=>{
  regenerate();
 
@@ -847,15 +959,20 @@ $("patron").onclick=()=>{
  }
 
  state.energy-=2;
- state.coins+=state.level;
+
+ const reward=coinsPerClick();
+
+ state.coins+=reward;
  state.last=Date.now();
 
  save();
  draw();
 
  $("gameMessage").textContent=
-  "+"+state.level+" монет!";
+  "+"+reward+" монет!";
 };
+
+/* ПОКРАЩЕННЯ РІВНЯ */
 
 $("upgrade").onclick=()=>{
  const cost=upgradeCost();
@@ -872,8 +989,11 @@ $("upgrade").onclick=()=>{
  draw();
 
  $("gameMessage").textContent=
-  "Рівень "+state.level+"! Тепер +"+state.level+" за клік.";
+  "Рівень "+state.level+
+  "! Тепер +"+coinsPerClick()+" за клік.";
 };
+
+/* СИНХРОНІЗАЦІЯ */
 
 window.addEventListener("cloud-loading",()=>{
  loadingCloud=true;
@@ -929,6 +1049,8 @@ import {
  getAuth,
  GoogleAuthProvider,
  signInWithPopup,
+ signInWithRedirect,
+ getRedirectResult,
  signOut,
  onAuthStateChanged
 }
@@ -990,7 +1112,8 @@ function valid(data){
 }
 
 function cleanName(value){
- return Array.from(value.trim()).slice(0,16).join("");
+ return Array.from(String(value||"").trim())
+  .slice(0,16).join("");
 }
 
 function renderProfile(){
@@ -1075,7 +1198,8 @@ async function flushSave(){
  }catch(error){
   if(currentUser?.uid===uid){
    pendingSave=data;
-   status("Помилка збереження: "+(error.code||error.message));
+   status("Помилка збереження: "+
+    (error.code||error.message));
   }
  }
 }
@@ -1156,8 +1280,7 @@ $("saveName").onclick=async()=>{
     (error.code||error.message));
   }
  }else{
-  localStorage.setItem
-(
+  localStorage.setItem(
    "potuzhnyi_guest_nickname",
    value
   );
@@ -1175,28 +1298,60 @@ async function login(){
  $("googleLogin").disabled=true;
  status("Відкриваємо Google…");
 
+ const provider=new GoogleAuthProvider();
+
+ provider.setCustomParameters({
+  prompt:"select_account"
+ });
+
  try{
-  const provider=new GoogleAuthProvider();
-
-  provider.setCustomParameters({
-   prompt:"select_account"
-  });
-
   await signInWithPopup(auth,provider);
  }catch(error){
-  status("Помилка входу: "+
-   (error.code||error.message));
+  const code=error.code||"";
+
+  if(
+   code==="auth/popup-blocked"||
+   code==="auth/operation-not-supported-in-this-environment"
+  ){
+   status("Переходимо до Google…");
+
+   try{
+    await signInWithRedirect(auth,provider);
+   }catch(redirectError){
+    status(
+     "Помилка Google: "+
+     (redirectError.code||redirectError.message)
+    );
+   }
+  }else if(code==="auth/popup-closed-by-user"){
+   status("Вхід скасовано");
+  }else if(code==="auth/unauthorized-domain"){
+   status("Домен сайту не дозволений у Firebase");
+  }else{
+   status("Помилка входу: "+
+    (error.code||error.message));
+  }
  }finally{
   loginBusy=false;
   $("googleLogin").disabled=false;
  }
 }
 
-$("googleLogin").onclick=login;
+$("googleLogin").addEventListener("click",login);
+
+getRedirectResult(auth).catch(error=>{
+ status("Помилка повернення з Google: "+
+  (error.code||error.message));
+});
 
 $("googleLogout").onclick=async()=>{
- await flushSave();
- await signOut(auth);
+ try{
+  await flushSave();
+  await signOut(auth);
+ }catch(error){
+  status("Помилка виходу: "+
+   (error.code||error.message));
+ }
 };
 
 /* СИНХРОНІЗАЦІЯ */
@@ -1225,6 +1380,8 @@ onAuthStateChanged(auth,async user=>{
    "Увійди через Google, щоб зберігати прогрес.";
 
   status("Гостьовий режим");
+
+  window.dispatchEvent(new Event("cloud-ready"));
   return;
  }
 
