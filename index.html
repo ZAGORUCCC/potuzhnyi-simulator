@@ -101,6 +101,50 @@ button {
  height: 8%;
 }
 
+.menu-inventory {left:4%;top:42.2%;width:45%;height:15.5%;}
+
+/* РОЛЛ ТА ІНВЕНТАР */
+#rollScreen, #inventoryScreen {
+ position:fixed;inset:0;z-index:10;overflow:hidden;
+ background:linear-gradient(180deg,#1dbbff 0%,#79d9ff 55%,#fff 100%);
+}
+.roll-wrap,.inventory-wrap {
+ position:relative;width:100%;max-width:480px;height:100dvh;margin:auto;
+}
+.roll-art,.inventory-art {
+ position:absolute;inset:0;background-position:center;background-size:100% 100%;background-repeat:no-repeat;
+ pointer-events:none;
+}
+.roll-art {background-image:url("roll.png?v=1");}
+.inventory-art {background-image:url("inventory.png?v=1");}
+.screen-back {position:absolute;z-index:6;top:2%;left:3%;}
+.screen-balance {position:absolute;z-index:6;top:2%;right:3%;}
+.roll-title {position:absolute;z-index:4;top:11%;left:0;width:100%;text-align:center;
+ font-size:clamp(28px,8vw,43px);font-weight:900;text-shadow:0 3px 5px #183b73;}
+.roll-spin-hot {position:absolute;z-index:5;top:59%;left:15%;width:70%;height:12%;
+ background:transparent;border:0;color:transparent;font-size:0;border-radius:20px;}
+.roll-spin-hot:disabled {cursor:wait;}
+.roll-preview {position:absolute;z-index:4;top:24%;left:18%;width:64%;height:29%;
+ display:none;align-items:center;justify-content:center;flex-direction:column;gap:5px;
+ background:#ffffffed;border:4px solid #2bba65;border-radius:20px;box-shadow:0 8px 20px #0004;}
+.roll-preview.active {display:flex;}
+.roll-preview img {height:78%;max-width:94%;object-fit:contain;border-radius:12px;}
+.roll-preview strong {color:#142333;text-align:center;font-size:clamp(13px,4vw,20px);}
+.roll-message {position:absolute;z-index:5;top:73%;left:6%;width:88%;text-align:center;
+ font-weight:900;font-size:18px;color:#122d44;text-shadow:0 1px #fff;}
+.inventory-grid {position:absolute;z-index:3;top:24.1%;left:10.4%;width:79.2%;height:37.5%;
+ display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);
+ column-gap:2%;row-gap:2%;}
+.pet-slot {position:relative;border:0;background:transparent;padding:2px;min-width:0;min-height:0;}
+.pet-slot img {display:block;width:100%;height:100%;object-fit:cover;border-radius:9px;}
+.pet-slot.selected {outline:3px solid #f44336;outline-offset:-2px;border-radius:9px;}
+.pet-sell {position:absolute;inset:auto 1px 1px;background:#d71920;color:white;
+ font-size:clamp(9px,2.6vw,14px);font-weight:900;border:2px solid #fff;border-radius:7px;
+ min-height:35%;width:calc(100% - 2px);}
+.inventory-pages {position:absolute;z-index:5;top:65%;left:0;width:100%;display:flex;
+ justify-content:center;align-items:center;gap:14px;color:#14354c;font-weight:900;}
+.inventory-pages button {background:#101522;color:white;border:2px solid white;
+ border-radius:10px;padding:7px 13px;font-size:17px;}
 /* БАЛАНС */
 
 .balance {
@@ -646,11 +690,31 @@ button {
  </div>
 
  <button class="menu-hot menu-clicker" id="openClicker" aria-label="Клікер"></button>
- <button class="menu-hot menu-roll" data-soon="Ролл" aria-label="Ролл"></button>
+  <button class="menu-hot menu-roll" id="openRoll" aria-label="Ролл"></button>
  <button class="menu-hot menu-factory" data-soon="Фабрика" aria-label="Фабрика"></button>
- <button class="menu-hot menu-records" data-soon="Рекорди" aria-label="Рекорди"></button>
+  <button class="menu-hot menu-records" data-soon="Рекорди" aria-label="Рекорди"></button>
+  <button class="menu-hot menu-inventory" id="openInventory" aria-label="Інвентар"></button>
  <button class="menu-hot menu-settings" data-soon="Налаштування" aria-label="Налаштування"></button>
 </section>
+
+<!-- РОЛЛ: кнопка і ціна намальовані в roll.png, тут прозора зона натискання -->
+<section id="rollScreen" hidden><div class="roll-wrap">
+ <div class="roll-art"></div>
+ <button class="back-button screen-back" id="rollBack">❮ Назад</button>
+ <div class="balance screen-balance"><span class="coin">♛</span><span class="balance-number" id="rollCoins">0</span></div>
+ <div class="roll-title">РІВЕНЬ 1</div>
+ <div class="roll-preview" id="rollPreview"><img id="rollPreviewImage" alt="Пет"><strong id="rollPreviewName"></strong></div>
+ <button class="roll-spin-hot" id="spinRoll" aria-label="Крутити за 200 монет">Крутити</button>
+ <div class="roll-message" id="rollMessage"></div>
+</div></section>
+
+<!-- ІНВЕНТАР -->
+<section id="inventoryScreen" hidden><div class="inventory-wrap">
+ <div class="inventory-art"></div>
+ <button class="back-button screen-back" id="inventoryBack">❮ Назад</button>
+ <div class="inventory-grid" id="inventoryGrid"></div>
+ <div class="inventory-pages"><button id="prevInventory">❮</button><span id="inventoryPage">1 / 1</span><button id="nextInventory">❯</button></div>
+</div></section>
 
 <!-- КЛІКЕР -->
 
@@ -781,12 +845,23 @@ let state={
  coins:0,
  level:1,
  energy:100,
- last:Date.now()
+  last:Date.now(),
+  inventory:[]
 };
 
 let energyCarry=0;
 let toastTimer;
 let loadingCloud=false;
+let rolling=false;
+let inventoryPage=0;
+let selectedPet=-1;
+const PETS={
+ kvas:{name:"Квас Тарас",image:"kvas_taras.png",sell:50},
+ usyk:{name:"Усик",image:"usyk.png",sell:100},
+ paska:{name:"Скоро вже буде паска",image:"paska.png",sell:150}
+};
+const ROLL_PRICE=200;
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 
 try {
  const old=JSON.parse(localStorage.getItem(saveKey));
@@ -803,7 +878,9 @@ function normalize(){
  state.coins=Math.max(0,Math.floor(Number(state.coins)||0));
  state.level=Math.max(1,Math.floor(Number(state.level)||1));
  state.energy=Math.max(0,Math.min(100,Math.floor(Number(state.energy)||0)));
- state.last=Number(state.last)||Date.now();
+  state.last=Number(state.last)||Date.now();
+  state.inventory=Array.isArray(state.inventory)
+   ?state.inventory.filter(id=>Object.hasOwn(PETS,id)).slice(0,10000):[];
 }
 
 normalize();
@@ -846,7 +923,8 @@ function updateCharacter(){
 
 function draw(){
  $("coins").textContent=state.coins;
- $("menuCoins").textContent=state.coins;
+  $("menuCoins").textContent=state.coins;
+  $("rollCoins").textContent=state.coins;
  $("profileCoins").textContent=state.coins;
  $("profileLevel").textContent=state.level;
  $("level").textContent=state.level;
@@ -917,13 +995,17 @@ function regenerate(){
 function showMenu(){
  $("menu").hidden=false;
  $("game").hidden=true;
- $("profileScreen").hidden=true;
- draw();
+  $("profileScreen").hidden=true;
+  $("rollScreen").hidden=true;
+  $("inventoryScreen").hidden=true;
+  draw();
 }
 
 $("openClicker").onclick=()=>{
- $("menu").hidden=true;
- $("game").hidden=false;
+  $("menu").hidden=true;
+  $("rollScreen").hidden=true;
+  $("inventoryScreen").hidden=true;
+  $("game").hidden=false;
  regenerate();
  draw();
 };
@@ -936,11 +1018,105 @@ $("back").onclick=()=>{
 $("profileButton").onclick=()=>{
  $("menu").hidden=true;
  $("game").hidden=true;
- $("profileScreen").hidden=false;
- draw();
+  $("profileScreen").hidden=false;
+  $("rollScreen").hidden=true;
+  $("inventoryScreen").hidden=true;
+  draw();
 };
 
 $("profileBack").onclick=showMenu;
+
+$("openRoll").onclick=()=>{
+ $("menu").hidden=true;
+ $("rollScreen").hidden=false;
+ $("rollPreview").classList.remove("active");
+ $("rollMessage").textContent="";
+ draw();
+};
+$("rollBack").onclick=()=>{if(!rolling)showMenu();};
+$("openInventory").onclick=()=>{
+ $("menu").hidden=true;
+ $("inventoryScreen").hidden=false;
+ inventoryPage=0;selectedPet=-1;
+ renderInventory();
+};
+$("inventoryBack").onclick=showMenu;
+
+function renderInventory(){
+ const grid=$("inventoryGrid");
+ grid.replaceChildren();
+ const pages=Math.max(1,Math.ceil(state.inventory.length/16));
+ inventoryPage=Math.min(inventoryPage,pages-1);
+ $("inventoryPage").textContent=(inventoryPage+1)+" / "+pages;
+ $("prevInventory").disabled=inventoryPage===0;
+ $("nextInventory").disabled=inventoryPage>=pages-1;
+ for(let i=0;i<16;i++){
+  const index=inventoryPage*16+i;
+  const pet=PETS[state.inventory[index]];
+  const slot=document.createElement("div");
+  slot.className="pet-slot";
+  slot.tabIndex=pet?0:-1;
+  slot.setAttribute("role","button");
+  slot.setAttribute("aria-label",pet?pet.name:"Порожня клітинка");
+  if(pet){
+   const img=document.createElement("img");
+   img.src=pet.image;img.alt=pet.name;
+   slot.append(img);
+   if(selectedPet===index){
+    slot.classList.add("selected");
+    const sell=document.createElement("button");
+    sell.className="pet-sell";
+    sell.textContent="ПРОДАТИ";
+    sell.setAttribute("aria-label","Продати "+pet.name+" за "+pet.sell+" монет");
+    sell.onclick=event=>{
+     event.stopPropagation();
+     state.inventory.splice(index,1);
+     state.coins+=pet.sell;
+     selectedPet=-1;
+     save();draw();renderInventory();
+     toast("Продано: "+pet.name+" (+"+pet.sell+")");
+    };
+    slot.append(sell);
+   }
+   slot.onclick=()=>{selectedPet=selectedPet===index?-1:index;renderInventory();};
+   slot.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();slot.click();}};
+  }
+  grid.append(slot);
+ }
+}
+$("prevInventory").onclick=()=>{inventoryPage--;selectedPet=-1;renderInventory();};
+$("nextInventory").onclick=()=>{inventoryPage++;selectedPet=-1;renderInventory();};
+
+$("spinRoll").onclick=async()=>{
+ if(rolling)return;
+ if(state.coins<ROLL_PRICE){toast("Потрібно 200 монет!");return;}
+ rolling=true;
+ $("spinRoll").disabled=true;
+ state.coins-=ROLL_PRICE;
+ save();draw();
+ $("rollMessage").textContent="Крутимо…";
+ const preview=$("rollPreview");
+ const image=$("rollPreviewImage");
+ const name=$("rollPreviewName");
+ preview.classList.add("active");
+ const ids=["kvas","usyk","paska"];
+ // Виграш визначається один раз за затвердженими шансами.
+ const random=Math.random()*100;
+ const winner=random<55?"kvas":random<80?"usyk":"paska";
+ for(let i=0;i<32;i++){
+  const pet=PETS[ids[i%3]];
+  image.src=pet.image;
+  name.textContent=pet.name;
+  await wait(i<22?55:55+(i-21)*28);
+ }
+ image.src=PETS[winner].image;
+ name.textContent=PETS[winner].name;
+ state.inventory.push(winner);
+ save();draw();
+ $("rollMessage").textContent="ВИПАЛО: "+PETS[winner].name+"!";
+ rolling=false;
+ $("spinRoll").disabled=false;
+};
 
 document.querySelectorAll("[data-soon]").forEach(button=>{
  button.onclick=()=>{
@@ -1007,16 +1183,18 @@ window.addEventListener("cloud-load",event=>{
   coins:data.coins,
   level:data.level,
   energy:data.energy,
-  last:data.last||Date.now()
+   last:data.last||Date.now(),
+   inventory:data.inventory||[]
  };
 
  normalize();
  energyCarry=0;
  regenerate();
- draw();
+  draw();
+  renderInventory();
 
  try {
-  localStorage.setItem(saveKey,JSON.stringify(state));
+   localStorage.setItem(saveKey,JSON.stringify(state));
  }catch(e){}
 
  loadingCloud=false;
@@ -1418,21 +1596,26 @@ onAuthStateChanged(auth,async user=>{
       coins:0,
       level:1,
       energy:100,
-      last:Date.now()
+       last:Date.now(),
+       inventory:[]
      };
 
    await setDoc(playerRef,{
     coins:data.coins,
     level:data.level,
     energy:data.energy,
-    last:data.last,
-    updatedAt:Date.now()
+     last:data.last,
+     inventory:Array.isArray(data.inventory)?data.inventory:[],
+     updatedAt:Date.now()
    },{merge:true});
   }
 
-  if(session!==sessionId)return;
+   if(session!==sessionId)return;
 
-  playerId=await ensurePlayerId(user.uid);
+   // Старі хмарні записи можуть не мати поля inventory.
+   if(!Array.isArray(data.inventory))data.inventory=[];
+
+   playerId=await ensurePlayerId(user.uid);
 
   if(session!==sessionId)return;
 
