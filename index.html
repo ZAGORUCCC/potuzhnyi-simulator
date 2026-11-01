@@ -1274,8 +1274,8 @@ function renderInventory(){
    // Порожні клітинки залишаються прозорими; фон додається лише з петoм.
    slot.classList.add("occupied");
    detectPetBackground(pet.image, color=>{
-    // Слот міг бути видалений після перемальовування інвентарю.
-    if(slot.isConnected) slot.style.setProperty("--pet-color",color);
+    // Колір застосовується навіть до слота, який ще не доданий у DOM.
+    slot.style.setProperty("--pet-color",color);
    });
    const img=document.createElement("img");
    img.src=pet.image;img.alt=pet.name;
