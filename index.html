@@ -282,6 +282,23 @@ button {
 .pet-slot img.pet-kvas { padding:5%; }
 .pet-slot img.pet-usyk { padding:3%; }
 .pet-slot img.pet-paska { padding:4%; }
+/* Фон з’являється тільки в зайнятій клітинці.
+   Розмита копія картинки заповнює квадрат, а чіткий пет залишається цілим. */
+.pet-slot.occupied { background:var(--pet-color, #70b88b); isolation:isolate; }
+.pet-slot.occupied::before {
+ content:"";
+ position:absolute;
+ inset:-12%;
+ background-image:var(--pet-image);
+ background-size:cover;
+ background-position:center;
+ filter:blur(10px);
+ opacity:.85;
+ z-index:0;
+ pointer-events:none;
+}
+.pet-slot.occupied > img {position:relative;z-index:1;}
+.pet-slot.occupied > .pet-sell {z-index:2;}
 .pet-slot.selected {outline:3px solid #f44336;outline-offset:-2px;}
 .pet-sell {
  position:absolute;
@@ -1224,6 +1241,11 @@ function renderInventory(){
   slot.setAttribute("role","button");
   slot.setAttribute("aria-label",pet?pet.name:"Порожня клітинка");
   if(pet){
+   // Порожні клітинки залишаються прозорими; фон додається лише з петoм.
+   slot.classList.add("occupied");
+   slot.style.setProperty("--pet-image", `url("${pet.image}")`);
+   const petColors={kvas:"#4eaa54",usyk:"#88a7be",paska:"#e6b66c"};
+   slot.style.setProperty("--pet-color",petColors[state.inventory[index]]||"#70b88b");
    const img=document.createElement("img");
    img.src=pet.image;img.alt=pet.name;
    img.className="pet-"+state.inventory[index];
