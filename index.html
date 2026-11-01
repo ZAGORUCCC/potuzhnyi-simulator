@@ -282,20 +282,9 @@ button {
 .pet-slot img.pet-kvas { padding:5%; }
 .pet-slot img.pet-usyk { padding:3%; }
 .pet-slot img.pet-paska { padding:4%; }
-/* Фон з’являється тільки в зайнятій клітинці.
-   Розмита копія картинки заповнює квадрат, а чіткий пет залишається цілим. */
-.pet-slot.occupied { background:var(--pet-color, #70b88b); isolation:isolate; }
-.pet-slot.occupied::before {
- content:"";
- position:absolute;
- inset:-12%;
- background-image:var(--pet-image);
- background-size:cover;
- background-position:center;
- filter:blur(10px);
- opacity:.85;
- z-index:0;
- pointer-events:none;
+/* Колір фону зайнятої клітинки визначається з країв PNG пета. */
+.pet-slot.occupied {
+ background:var(--pet-color, transparent);
 }
 .pet-slot.occupied > img {position:relative;z-index:1;}
 .pet-slot.occupied > .pet-sell {z-index:2;}
@@ -1224,6 +1213,47 @@ $("openInventory").onclick=()=>{
 };
 $("inventoryBack").onclick=showMenu;
 
+/* Беремо реальний колір з кутів картинки, а не задаємо його вручну.
+   Кеш дозволяє не аналізувати PNG при кожному відкритті інвентарю. */
+const petBackgroundCache=new Map();
+function detectPetBackground(imageUrl, callback){
+ if(petBackgroundCache.has(imageUrl)){
+  callback(petBackgroundCache.get(imageUrl));
+  return;
+ }
+ const source=new Image();
+ source.onload=()=>{
+  let color="transparent";
+  try{
+   const canvas=document.createElement("canvas");
+   canvas.width=48;canvas.height=48;
+   const ctx=canvas.getContext("2d",{willReadFrequently:true});
+   ctx.drawImage(source,0,0,48,48);
+   const pixels=ctx.getImageData(0,0,48,48).data;
+   const samples=[];
+   // Пікселі з чотирьох кутів, подалі від персонажа в центрі.
+   for(const [x0,y0] of [[1,1],[41,1],[1,41],[41,41]]){
+    for(let y=y0;y<y0+6;y++)for(let x=x0;x<x0+6;x++){
+     const k=(y*48+x)*4;
+     if(pixels[k+3]>230) samples.push([pixels[k],pixels[k+1],pixels[k+2]]);
+    }
+   }
+   if(samples.length){
+    // Медіана по кожному каналу прибирає випадкові крайові деталі.
+    const rgb=[0,1,2].map(c=>{
+     const v=samples.map(p=>p[c]).sort((a,b)=>a-b);
+     return v[Math.floor(v.length/2)];
+    });
+    color=`rgb(${rgb.join(",")})`;
+   }
+  }catch(err){console.warn("Не вдалося визначити фон пета:",imageUrl,err);}
+  petBackgroundCache.set(imageUrl,color);
+  callback(color);
+ };
+ source.onerror=()=>{petBackgroundCache.set(imageUrl,"transparent");callback("transparent");};
+ source.src=imageUrl;
+}
+
 function renderInventory(){
  const grid=$("inventoryGrid");
  grid.replaceChildren();
@@ -1243,9 +1273,10 @@ function renderInventory(){
   if(pet){
    // Порожні клітинки залишаються прозорими; фон додається лише з петoм.
    slot.classList.add("occupied");
-   slot.style.setProperty("--pet-image", `url("${pet.image}")`);
-   const petColors={kvas:"#4eaa54",usyk:"#88a7be",paska:"#e6b66c"};
-   slot.style.setProperty("--pet-color",petColors[state.inventory[index]]||"#70b88b");
+   detectPetBackground(pet.image, color=>{
+    // Слот міг бути видалений після перемальовування інвентарю.
+    if(slot.isConnected) slot.style.setProperty("--pet-color",color);
+   });
    const img=document.createElement("img");
    img.src=pet.image;img.alt=pet.name;
    img.className="pet-"+state.inventory[index];
