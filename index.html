@@ -837,10 +837,65 @@ button {
   min-height: 105px;
  }
 }
+
+/* Екран завантаження: окремий фон loading.png */
+#startupLoader{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;background:#d8edfa url("loading.png") center center / 100% 100% no-repeat;color:#102d49;font-family:Arial,sans-serif;transition:opacity .3s ease;}
+#startupLoader.done{opacity:0;pointer-events:none;}
+#startupLoader .loader-title{font-size:clamp(23px,6vw,34px);font-weight:900;text-align:center;padding:0 18px;letter-spacing:.4px;text-shadow:0 2px 8px #ffffffa8;}
+#startupLoader .loader-spinner{width:44px;height:44px;border:5px solid #1c6caa35;border-top-color:#146fae;border-radius:50%;animation:startup-spin .8s linear infinite;}
+#startupLoader .loader-track{width:min(82vw,340px);height:20px;border:2px solid #184d79;border-radius:12px;overflow:hidden;background:#ffffffad;box-shadow:0 3px 12px #134d7529;}
+#startupLoader .loader-fill{width:0;height:100%;background:linear-gradient(90deg,#2aa9ec,#1867c9);transition:width .15s ease;}
+#startupLoader .loader-status{font-size:15px;font-weight:700;text-align:center;padding:0 14px;text-shadow:0 1px 6px #fff;}
+@keyframes startup-spin{to{transform:rotate(360deg)}}
+
 </style>
 </head>
 
 <body>
+<div id="startupLoader" role="status" aria-live="polite">
+ <div class="loader-title">ПОТУЖНИЙ СИМУЛЯТОР</div>
+ <div class="loader-spinner" aria-hidden="true"></div>
+ <div class="loader-track"><div class="loader-fill" id="startupFill"></div></div>
+ <div class="loader-status" id="startupStatus">Завантаження гри... 0%</div>
+</div>
+<script>
+(function(){
+ const assets=[
+  "loading.png", "menu.png?v=4","roll.png?v=8","inventory.png?v=6","profile.png?v=6",
+  "case.png?v=1","patron.png?v=3","boss_snu.png?v=1",
+  "kvas_taras.png","usyk.png","paska.png"
+ ];
+ const fill=document.getElementById('startupFill');
+ const status=document.getElementById('startupStatus');
+ const overlay=document.getElementById('startupLoader');
+ let loaded=0,finished=false;
+ const update=()=>{
+  const percent=Math.round(loaded/assets.length*100);
+  fill.style.width=percent+'%';
+  status.textContent='Завантаження вкладок і персонажів... '+percent+'%';
+ };
+ const finish=()=>{
+  if(finished)return;
+  finished=true;
+  fill.style.width='100%';
+  status.textContent='Готово!';
+  overlay.classList.add('done');
+  setTimeout(()=>overlay.remove(),300);
+ };
+ // На повільному інтернеті не блокуємо вхід безкінечно.
+ const timeout=setTimeout(()=>{
+  status.textContent='Продовжуємо завантаження у фоновому режимі...';
+  finish();
+ },15000);
+ Promise.all(assets.map(url=>new Promise(resolve=>{
+  const img=new Image();
+  img.onload=img.onerror=()=>{loaded++;update();resolve();};
+  img.src=url;
+  if(img.complete){ /* onload все одно викличеться для кешованих файлів */ }
+ }))).then(()=>{clearTimeout(timeout);setTimeout(finish,250);});
+})();
+</script>
+
 
 <!-- ГОЛОВНЕ МЕНЮ -->
 
