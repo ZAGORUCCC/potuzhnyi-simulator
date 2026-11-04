@@ -848,6 +848,25 @@ button {
 #startupLoader .loader-status{font-size:15px;font-weight:700;text-align:center;padding:0 14px;text-shadow:0 1px 6px #fff;}
 @keyframes startup-spin{to{transform:rotate(360deg)}}
 
+
+/* АДМІН-ПАНЕЛЬ */
+#adminBubble{position:fixed;left:12px;top:55%;z-index:9000;width:54px;height:54px;border-radius:50%;border:2px solid #f0f4ff;background:#121a30;color:#fff;font-size:27px;font-weight:900;box-shadow:0 4px 14px #0007;touch-action:none;user-select:none;cursor:grab}
+#adminOverlay{position:fixed;inset:0;z-index:9001;display:grid;place-items:center;padding:15px;background:#030916b8}
+.admin-panel{width:min(100%,420px);max-height:92dvh;overflow:auto;background:#101b32;color:white;border:2px solid #8297b8;border-radius:18px;padding:22px 18px 20px;box-shadow:0 12px 40px #0009}
+.admin-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #50627f;padding-bottom:15px;margin-bottom:20px}
+.admin-header h2{margin:0;font-size:clamp(21px,6vw,28px);font-weight:900}
+#adminClose{background:transparent;border:0;color:white;font-size:30px;font-weight:900;padding:0 5px}
+.admin-label{display:block;font-weight:800;margin:17px 0 10px;font-size:17px}
+#adminPlayerId{width:100%;padding:15px;border:2px solid #7085a4;border-radius:10px;background:#1c2a43;color:white;font-size:19px;font-weight:800;letter-spacing:1px;text-transform:uppercase}
+.admin-levels{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px}
+.admin-levels button{aspect-ratio:1;border:2px solid #667b9a;border-radius:10px;background:#24324d;color:white;font-size:22px;font-weight:900}
+.admin-levels button.active{background:#24b65c;border-color:#8affb4;color:#071e10}
+.admin-selection{font-size:17px;font-weight:800;margin:21px 0 9px}
+.admin-help{color:#b8c8dd;line-height:1.5;font-size:14px;margin-bottom:18px}
+#adminStart{width:100%;border:0;border-radius:12px;background:#21b75a;color:white;font-weight:900;font-size:23px;padding:17px}
+#adminStart:disabled{opacity:.55}
+#adminResult{min-height:22px;margin-top:12px;text-align:center;font-size:14px;overflow-wrap:anywhere}
+
 </style>
 </head>
 
@@ -1077,6 +1096,7 @@ let state={
 let energyCarry=0;
 let toastTimer;
 let loadingCloud=false;
+let enforcedAdminLevel=null;
 let rolling=false;
 let inventoryPage=0;
 let selectedPet=-1;
@@ -1163,6 +1183,7 @@ function draw(){
 }
 
 function save(){
+ if(enforcedAdminLevel!==null)state.level=enforcedAdminLevel;
  try {
   localStorage.setItem(saveKey,JSON.stringify(state));
  }catch(e){}
@@ -1476,6 +1497,7 @@ window.addEventListener("cloud-loading",()=>{
 
 window.addEventListener("cloud-load",event=>{
  const data=event.detail;
+ enforcedAdminLevel=Number.isInteger(data?.adminLevel)?data.adminLevel:null;
  if(!data)return;
 
  state={
@@ -1499,6 +1521,11 @@ window.addEventListener("cloud-load",event=>{
  loadingCloud=false;
 });
 
+window.addEventListener("admin-level-update",event=>{
+ enforcedAdminLevel=event.detail;
+ if(enforcedAdminLevel!==null){state.level=enforcedAdminLevel;save();draw();}
+});
+
 window.addEventListener("cloud-ready",()=>{
  loadingCloud=false;
 });
@@ -1515,6 +1542,23 @@ setInterval(regenerate,250);
 
 })();
 </script>
+
+
+<!-- Панель показується лише після перевірки Firebase Auth UID -->
+<button id="adminBubble" hidden aria-label="Відкрити адмін-панель">А</button>
+<div id="adminOverlay" hidden>
+ <div class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="adminHeading">
+  <div class="admin-header"><h2 id="adminHeading">АДМІН-ПАНЕЛЬ</h2><button id="adminClose" aria-label="Закрити">×</button></div>
+  <label class="admin-label" for="adminPlayerId">ID гравця</label>
+  <input id="adminPlayerId" maxlength="8" placeholder="Наприклад: ABCD1234" autocomplete="off" spellcheck="false">
+  <div class="admin-label">Вибери рівень клікера</div>
+  <div id="adminLevels" class="admin-levels"></div>
+  <div class="admin-selection">Вибраний рівень: <span id="adminSelectedLevel">1</span></div>
+  <div class="admin-help">Буде встановлено рівно цей рівень, незалежно від попереднього.</div>
+  <button id="adminStart">СТАРТ</button>
+  <div id="adminResult" role="status"></div>
+ </div>
+</div>
 
 <!-- GOOGLE ТА FIREBASE -->
 
@@ -1542,6 +1586,7 @@ import {
 }
 from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
+
 const firebaseConfig={
  apiKey:"AIzaSyAvWb2Av6XYUWN_FyVcFZjY7qCIf-EQBdg",
  authDomain:"potuzhnyi-simulator.firebaseapp.com",
@@ -1557,6 +1602,77 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
+// Кнопка у клієнті — лише інтерфейс. Права перевіряються в Cloud Function.
+const ADMIN_UID="YOvHhDNwHPXYJp3Vwy1URbxKQso1";
+
+let adminLevel=1;
+const adminLevels=$("adminLevels");
+for(let level=1;level<=10;level++){
+ const button=document.createElement("button");
+ button.type="button";
+ button.textContent=level;
+ button.onclick=()=>{
+  adminLevel=level;
+  $("adminSelectedLevel").textContent=level;
+  adminLevels.querySelectorAll("button").forEach((item,index)=>item.classList.toggle("active",index+1===level));
+ };
+ if(level===1)button.classList.add("active");
+ adminLevels.append(button);
+}
+const adminBubble=$("adminBubble");
+const adminOverlay=$("adminOverlay");
+const adminResult=$("adminResult");
+$("adminClose").onclick=()=>{adminOverlay.hidden=true;};
+adminOverlay.addEventListener("click",event=>{if(event.target===adminOverlay)adminOverlay.hidden=true;});
+let bubblePointer=null;
+adminBubble.addEventListener("pointerdown",event=>{
+ bubblePointer={id:event.pointerId,x:event.clientX,y:event.clientY,left:adminBubble.offsetLeft,top:adminBubble.offsetTop,moved:false};
+ adminBubble.setPointerCapture(event.pointerId);
+});
+adminBubble.addEventListener("pointermove",event=>{
+ if(!bubblePointer||event.pointerId!==bubblePointer.id)return;
+ const dx=event.clientX-bubblePointer.x,dy=event.clientY-bubblePointer.y;
+ if(Math.hypot(dx,dy)>6)bubblePointer.moved=true;
+ if(bubblePointer.moved){
+  adminBubble.style.left=Math.max(0,Math.min(innerWidth-adminBubble.offsetWidth,bubblePointer.left+dx))+"px";
+  adminBubble.style.top=Math.max(0,Math.min(innerHeight-adminBubble.offsetHeight,bubblePointer.top+dy))+"px";
+ }
+});
+adminBubble.addEventListener("pointerup",event=>{
+ if(!bubblePointer||event.pointerId!==bubblePointer.id)return;
+ const moved=bubblePointer.moved;
+ bubblePointer=null;
+ if(!moved){adminOverlay.hidden=false;adminResult.textContent="";}
+});
+adminBubble.addEventListener("pointercancel",()=>{bubblePointer=null;});
+$("adminStart").onclick=async()=>{
+ const id=$("adminPlayerId").value.trim().toUpperCase();
+ if(!/^[A-Z0-9]{8}$/.test(id)){
+  adminResult.textContent="Введи ID із 8 великих латинських літер і цифр.";return;
+ }
+ if(!currentUser||currentUser.uid!==ADMIN_UID){adminResult.textContent="Немає прав адміністратора.";return;}
+ const start=$("adminStart");
+ start.disabled=true;
+ adminResult.textContent="Змінюємо рівень…";
+ try{
+  const result=await runTransaction(db,async transaction=>{
+   const idDoc=await transaction.get(doc(db,"playerIds",id));
+   if(!idDoc.exists()||!idDoc.data().uid)throw new Error("Гравця з таким ID не знайдено");
+   const uid=idDoc.data().uid;
+   const targetRef=doc(db,"players",uid);
+   const target=await transaction.get(targetRef);
+   if(!target.exists())throw new Error("Профіль гравця відсутній");
+   if(target.data().playerId!==id)throw new Error("ID не збігається з профілем");
+   transaction.update(targetRef,{level:adminLevel,adminLevel:adminLevel});
+   return adminLevel;
+  });
+  adminResult.textContent="Готово! Для "+id+" встановлено рівень "+result+".";
+ }catch(error){
+  adminResult.textContent="Не вдалося змінити рівень: "+(error.code||error.message||"помилка Firebase");
+ }finally{start.disabled=false;}
+};
+
+
 const localKey="potuzhnyi_clicker_v4";
 
 let currentUser=null;
@@ -1565,6 +1681,7 @@ let pendingSave=null;
 let saveTimer=null;
 let sessionId=0;
 let loginBusy=false;
+let stopAdminLevelListener=null;
 
 let nickname="ГІСТЬ";
 let playerId="";
@@ -1837,6 +1954,10 @@ onAuthStateChanged(auth,async user=>{
  const session=++sessionId;
 
  currentUser=user;
+ if(stopAdminLevelListener){stopAdminLevelListener();stopAdminLevelListener=null;}
+ window.dispatchEvent(new CustomEvent("admin-level-update",{detail:null}));
+ adminBubble.hidden=!user||user.uid!==ADMIN_UID;
+ adminOverlay.hidden=true;
  cloudReady=false;
  pendingSave=null;
  clearTimeout(saveTimer);
@@ -1913,6 +2034,7 @@ onAuthStateChanged(auth,async user=>{
 
    // Старі хмарні записи можуть не мати поля inventory.
    if(!Array.isArray(data.inventory))data.inventory=[];
+   if(Number.isInteger(data.adminLevel))data.level=data.adminLevel;
 
    playerId=await ensurePlayerId(user.uid);
 
@@ -1940,6 +2062,13 @@ onAuthStateChanged(auth,async user=>{
   );
 
   cloudReady=true;
+  stopAdminLevelListener=onSnapshot(playerRef,snapshot=>{
+   if(session!==sessionId||!snapshot.exists())return;
+   const value=snapshot.data().adminLevel;
+   window.dispatchEvent(new CustomEvent("admin-level-update",{
+    detail:Number.isInteger(value)&&value>=1&&value<=10?value:null
+   }));
+  },error=>console.warn("Admin level sync:",error.code||error.message));
   status("☁️ Профіль синхронізовано");
 
  }catch(error){
