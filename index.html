@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -163,13 +164,6 @@ button {
  background:rgba(0,15,30,.38);
 }
 .roll-stage.active {display:block;}
-
-/* ВИПРАВЛЕННЯ: після завершення тряски кейс залишається видимим */
-.roll-stage.active .roll-case-assembly {
- opacity:1;
- visibility:visible;
-}
-
 .roll-stage.show-pets {background:transparent;}
 .roll-case-assembly {
  position:absolute;
@@ -194,30 +188,33 @@ button {
 .roll-case-body {z-index:1;}
 .roll-case-lid {
  z-index:2;
- transform-origin:50% 54%;
+ /* Задній край кришки — вісь обертання, передній підіймається вгору. */
+ transform-origin:50% 0%;
+ transform-style:preserve-3d;
  backface-visibility:visible;
 }
 .roll-stage.opening .roll-case-assembly {
- animation:case-shake 1.05s ease-in-out forwards;
+ animation:case-shake 1.2s ease-in-out forwards;
 }
 @keyframes case-shake {
- 0% {opacity:0;transform:translateX(0);}
- 10% {opacity:1;transform:translateX(0);}
- 22% {transform:translateX(-5%);}
- 34% {transform:translateX(5%);}
- 46% {transform:translateX(-5%);}
- 58% {transform:translateX(5%);}
- 70% {transform:translateX(-3%);}
- 82% {transform:translateX(3%);}
- 100% {opacity:1;transform:translateX(0);}
+ 0% {opacity:0;transform:translateX(0) rotate(0);}
+ 12% {opacity:1;transform:translateX(0) rotate(0);}
+ 25% {transform:translateX(-2.5%) rotate(-1deg);}
+ 38% {transform:translateX(2.5%) rotate(1deg);}
+ 51% {transform:translateX(-2%) rotate(-.7deg);}
+ 64% {transform:translateX(2%) rotate(.7deg);}
+ 78% {transform:translateX(-1%) rotate(-.3deg);}
+ 100% {opacity:1;transform:translateX(0) rotate(0);}
 }
 .roll-stage.lid-open .roll-case-lid {
- animation:lid-opening .65s ease-out forwards;
+ animation:lid-opening .85s cubic-bezier(.22,.61,.36,1) forwards;
 }
 @keyframes lid-opening {
  from {transform:rotateX(0deg);}
- to {transform:rotateX(-115deg);}
+ to {transform:rotateX(-110deg);}
 }
+/* Коли пет вилітає, кейс залишається позаду й не заважає роллу. */
+.roll-stage.show-pets .roll-case-assembly {visibility:hidden;}
 .roll-preview {
  position:absolute;
  left:10%;
@@ -689,7 +686,22 @@ button {
  overflow: hidden;
  overflow-wrap: anywhere;
  line-height: 1.05;
-}.profile-id {
+}
+
+.edit-name {
+ position: absolute;
+ z-index: 3;
+ left: 65.5%;
+ top: 28.8%;
+ width: 7%;
+ height: 3.7%;
+ border: none;
+ background: transparent;
+ color: transparent;
+ font-size: 0;
+}
+
+.profile-id {
  position: absolute;
  left: 39%;
  top: 34%;
@@ -1454,12 +1466,12 @@ $("spinRoll").onclick=async()=>{
  // 1. Кейс хитається з боку в бік і зупиняється.
  stage.classList.add("active","opening");
  staticCase.classList.add("hidden-case");
- await wait(1050);
+ await wait(1200);
 
- // 2. Кришка відкидається назад.
+ // 2. Кришка підіймається навколо заднього краю, корпус нерухомий.
  stage.classList.remove("opening");
  stage.classList.add("lid-open");
- await wait(650);
+ await wait(850);
 
  // 3. Виграшний пет вилітає з відкритого кейса.
  stage.classList.add("show-pets","pet-pop");
@@ -1468,12 +1480,11 @@ $("spinRoll").onclick=async()=>{
  $("rollMessage").textContent=winningPet.name+"!";
  await wait(900);
 
- // 3. Пет і кейс зникають — починається звичайний ролл.
- stage.classList.remove("pet-pop","show-pets","lid-open");
+ // 4. Кейс залишається прихованим, починається звичайний ролл.
+ stage.classList.remove("pet-pop","lid-open");
  $("rollMessage").textContent="Крутимо…";
  await wait(180);
 
- stage.classList.add("show-pets");
  preview.classList.add("spinning");
 
  // Прокручування всіх доступних петів; останнім завжди буде той самий виграш.
