@@ -200,6 +200,16 @@ button {
  overflow:visible;
 }
 .roll-stage.show-pets .roll-preview {display:flex;}
+/* Пет спочатку вистрибує з кейса, а потім переходить у звичайний ролл. */
+.roll-stage.pet-pop .roll-preview {
+ animation:pet-pop-out .85s cubic-bezier(.18,.82,.25,1.18) both;
+}
+@keyframes pet-pop-out {
+  0% {opacity:0;transform:translateY(42%) scale(.25);}
+  65% {opacity:1;transform:translateY(-16%) scale(1.12);}
+  82% {opacity:1;transform:translateY(3%) scale(.96);}
+  100% {opacity:1;transform:translateY(0) scale(1);}
+}
 .roll-preview img {
  display:block;
  width:100%;
@@ -1389,54 +1399,84 @@ $("nextInventory").onclick=()=>{inventoryPage++;selectedPet=-1;renderInventory()
 $("spinRoll").onclick=async()=>{
  if(rolling)return;
  if(state.coins<ROLL_PRICE){toast("Потрібно 200 монет!");return;}
+
  rolling=true;
  $("spinRoll").disabled=true;
  state.coins-=ROLL_PRICE;
  save();draw();
- $("rollMessage").textContent="Крутимо…";
+
  const preview=$("rollPreview");
  const image=$("rollPreviewImage");
  const name=$("rollPreviewName");
  const stage=$("rollStage");
- stage.classList.remove("active","opening","show-pets");
+ const staticCase=$("rollCaseStatic");
+ const ids=Object.keys(PETS);
+
+ // Визначаємо виграш один раз: пет із кейса і фінал роллу будуть однаковими.
+ const random=Math.random()*100;
+ const winner=random<55?"kvas":random<80?"usyk":"paska";
+ const winningPet=PETS[winner];
+
+ $("rollMessage").textContent="Кейс відкривається…";
+ stage.classList.remove("active","opening","show-pets","pet-pop");
+ preview.classList.remove("spinning");
+ image.removeAttribute("src");
+ name.textContent="";
  void stage.offsetWidth;
- stage.classList.add("active","opening");
- $("rollCaseStatic").classList.add("hidden-case");
- // Даємо кейсу повністю завершити анімацію до появи петів.
- await wait(1050);
- stage.classList.remove("opening");
- stage.classList.add("show-pets");
- preview.classList.add("spinning");
- const ids=["kvas","usyk","paska"];
- // Попереднє завантаження усуває порожні кадри на повільному телефоні.
+
+ // Завчасно завантажуємо всі картинки, щоб не було порожніх кадрів.
  await Promise.all(ids.map(id=>new Promise(resolve=>{
   const picture=new Image();
   picture.onload=resolve;
   picture.onerror=resolve;
   picture.src=PETS[id].image;
  })));
- // Виграш визначається один раз за затвердженими шансами.
- const random=Math.random()*100;
- const winner=random<55?"kvas":random<80?"usyk":"paska";
+
+ // 1. Кейс рухається з боку в бік і поступово зупиняється.
+ stage.classList.add("active","opening");
+ staticCase.classList.add("hidden-case");
+ await wait(1050);
+
+ // 2. Кейс зникає, а виграшний пет вистрибує з його місця.
+ stage.classList.remove("opening");
+ stage.classList.add("show-pets","pet-pop");
+ image.src=winningPet.image;
+ name.textContent=winningPet.name;
+ $("rollMessage").textContent=winningPet.name+"!";
+ await wait(900);
+
+ // 3. Пет і кейс зникають — починається звичайний ролл.
+ stage.classList.remove("pet-pop","show-pets");
+ $("rollMessage").textContent="Крутимо…";
+ await wait(180);
+
+ stage.classList.add("show-pets");
+ preview.classList.add("spinning");
+
+ // Прокручування всіх доступних петів; останнім завжди буде той самий виграш.
  for(let i=0;i<32;i++){
-  const pet=PETS[ids[i%3]];
+  const pet=PETS[ids[i%ids.length]];
   image.src=pet.image;
   name.textContent=pet.name;
   await wait(i<22?55:55+(i-21)*28);
  }
+
  preview.classList.remove("spinning");
- image.src=PETS[winner].image;
- name.textContent=PETS[winner].name;
+ image.src=winningPet.image;
+ name.textContent=winningPet.name;
+
+ // Додаємо виграш в інвентар лише один раз — після завершення роллу.
  state.inventory.push(winner);
  save();draw();
- $("rollMessage").textContent="ВИПАЛО: "+PETS[winner].name+"!";
- // Показуємо виграш рівно 2 секунди, тоді відновлюємо кейс.
+ $("rollMessage").textContent="ВИПАЛО: "+winningPet.name+"!";
+
  await wait(2000);
+
+ stage.classList.remove("active","opening","show-pets","pet-pop");
  preview.classList.remove("spinning");
- stage.classList.remove("active","opening","show-pets");
  image.removeAttribute("src");
  name.textContent="";
- $("rollCaseStatic").classList.remove("hidden-case");
+ staticCase.classList.remove("hidden-case");
  $("rollMessage").textContent="";
  rolling=false;
  $("spinRoll").disabled=false;
