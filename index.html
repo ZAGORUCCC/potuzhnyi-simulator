@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="uk">
 <head>
@@ -164,6 +163,13 @@ button {
  background:rgba(0,15,30,.38);
 }
 .roll-stage.active {display:block;}
+
+/* ВИПРАВЛЕННЯ: після завершення тряски кейс залишається видимим */
+.roll-stage.active .roll-case-assembly {
+ opacity:1;
+ visibility:visible;
+}
+
 .roll-stage.show-pets {background:transparent;}
 .roll-case-assembly {
  position:absolute;
@@ -683,22 +689,7 @@ button {
  overflow: hidden;
  overflow-wrap: anywhere;
  line-height: 1.05;
-}
-
-.edit-name {
- position: absolute;
- z-index: 3;
- left: 65.5%;
- top: 28.8%;
- width: 7%;
- height: 3.7%;
- border: none;
- background: transparent;
- color: transparent;
- font-size: 0;
-}
-
-.profile-id {
+}.profile-id {
  position: absolute;
  left: 39%;
  top: 34%;
