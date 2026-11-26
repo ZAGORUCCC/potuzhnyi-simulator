@@ -188,7 +188,7 @@ button {
 .roll-case-body {z-index:1;}
 .roll-case-lid {
  z-index:2;
- transform-origin:50% 43%;
+ transform-origin:50% 54%;
  backface-visibility:visible;
 }
 .roll-stage.opening .roll-case-assembly {
@@ -920,7 +920,7 @@ button {
 (function(){
  const assets=[
   "loading.png", "menu.png?v=4","roll.png?v=8","inventory.png?v=6","profile.png?v=6",
-  "case_transparent_fixed.png?v=4","case_body.png","case_lid.png","patron.png?v=3","boss_snu.png?v=1",
+  "case_transparent_fixed.png?v=4","case_body.png?v=2","case_lid.png?v=2","patron.png?v=3","boss_snu.png?v=1",
   "kvas_taras.png","usyk.png","paska.png"
  ];
  const fill=document.getElementById('startupFill');
@@ -987,8 +987,8 @@ button {
  <div class="balance screen-balance"><span class="coin">♛</span><span class="balance-number" id="rollCoins">0</span></div>
  <div class="roll-title">РІВЕНЬ 1</div>
  <div class="roll-stage" id="rollStage"><div class="roll-case-assembly" aria-hidden="true">
-  <img class="roll-case-zoom roll-case-body" src="case_body.png" alt="">
-  <img class="roll-case-zoom roll-case-lid" src="case_lid.png" alt="">
+  <img class="roll-case-zoom roll-case-body" src="case_body.png?v=2" alt="">
+  <img class="roll-case-zoom roll-case-lid" src="case_lid.png?v=2" alt="">
  </div><div class="roll-preview" id="rollPreview"><img id="rollPreviewImage" alt="Пет"><strong id="rollPreviewName"></strong></div></div>
  <button class="roll-spin-hot" id="spinRoll" aria-label="Крутити за 200 монет">Крутити</button>
  <div class="roll-message" id="rollMessage"></div>
